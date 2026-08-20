@@ -1,0 +1,7 @@
+# Ignore references
+backend-reference/
+references/
+
+# System
+.DS_Store
+Thumbs.db
