@@ -1,5 +1,6 @@
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import DateTime
 from sqlalchemy.ext.asyncio import (
@@ -41,11 +42,18 @@ class AuditMixin:
 
 
 # Async Engine & Sessionmaker
+engine_kwargs: dict[str, Any] = {
+    "echo": (settings.ENV == "dev" and settings.LOG_LEVEL == "DEBUG"),
+    "future": True,
+}
+if settings.DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    engine_kwargs["pool_pre_ping"] = True
+
 async_engine: AsyncEngine = create_async_engine(
     settings.DATABASE_URL,
-    echo=(settings.ENV == "dev" and settings.LOG_LEVEL == "DEBUG"),
-    future=True,
-    pool_pre_ping=True,
+    **engine_kwargs,
 )
 
 async_session_factory = async_sessionmaker(
