@@ -25,10 +25,12 @@ function ActionWorkspaceContent() {
 
 function WorkspaceContainer() {
   const searchParams = useSearchParams();
-  const docName = searchParams.get("docName") || "Master Services Agreement (Cloud Services v3.2)";
+  const docName = searchParams.get("docName") || "Master Services Agreement (Cloud Services v3.2).pdf";
+  const clauseId = searchParams.get("clauseId") || undefined;
+  const tabParam = (searchParams.get("tab") as "simulate" | "negotiate") || "simulate";
 
   return (
-    <ClauseProvider>
+    <ClauseProvider initialClauseId={clauseId} initialTab={tabParam}>
       <AppShell
         activeDocName={docName}
         activeDocStatus="Analysis Active"

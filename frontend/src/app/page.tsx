@@ -110,7 +110,7 @@ export default function HomePage() {
   const handleOpenDocument = (doc: DocumentItem) => {
     setActiveDocument(doc);
     showNotification(`Opening workspace for ${doc.name}...`);
-    router.push(`/simulate-negotiate?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`);
+    router.push(`/workspace?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}&tab=overview`);
   };
 
   const handleRetryAnalysis = (doc: DocumentItem) => {

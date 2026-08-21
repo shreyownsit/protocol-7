@@ -1,23 +1,43 @@
 "use client";
 
 import React, { useState } from "react";
-import { useClauseContext } from "../../context/ClauseContext";
+import { useOptionalClauseContext } from "../../context/ClauseContext";
 import { X, Copy, Download, Check, FileText } from "lucide-react";
 
-export const ExportModal: React.FC = () => {
-  const { isExportOpen, setIsExportOpen, activeClause, userEditedClause, simulationResult } = useClauseContext();
+interface ExportModalProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+  documentName?: string;
+}
+
+export const ExportModal: React.FC<ExportModalProps> = ({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  documentName: propDocName,
+}) => {
+  const context = useOptionalClauseContext();
+  const isExportOpen = propIsOpen !== undefined ? propIsOpen : context?.isExportOpen;
+  const setIsExportOpen = (open: boolean) => {
+    if (propOnClose && !open) propOnClose();
+    if (context?.setIsExportOpen) context.setIsExportOpen(open);
+  };
+  const activeClause = context?.activeClause;
+  const userEditedClause = context?.userEditedClause;
+  const simulationResult = context?.simulationResult;
+
   const [copied, setCopied] = useState(false);
   const [format, setFormat] = useState<"clause-only" | "full-brief">("full-brief");
 
-  if (!isExportOpen || !activeClause) return null;
+  if (!isExportOpen) return null;
 
-  const finalClauseText = userEditedClause || activeClause.finalCounterClause;
+  const finalClauseText = userEditedClause || activeClause?.finalCounterClause || "Section 8.2 & 5.4 Counter-Draft Package";
 
   const exportContent =
     format === "clause-only"
       ? finalClauseText
-      : `# LEXICLEAR NEGOTIATION COUNTER-PROPOSAL BRIEF
-Document: Master Services Agreement (Cloud Services v3.2)
+      : activeClause
+      ? `# LEXICLEAR NEGOTIATION COUNTER-PROPOSAL BRIEF
+Document: ${propDocName || "Master Services Agreement (Cloud Services v3.2).pdf"}
 Target: ${activeClause.section} — ${activeClause.title}
 Risk Level: ${activeClause.severity.toUpperCase()}
 Generated: ${new Date().toLocaleDateString()}
@@ -39,6 +59,25 @@ ${finalClauseText}
 ## 5. AUDITOR ATTESTATION
 Status: ${activeClause.auditorEvaluation.status.toUpperCase()} (${activeClause.auditorEvaluation.score}% Score)
 Reasoning: ${activeClause.auditorEvaluation.reasoning}
+`
+      : `# LEXICLEAR COMPLETE CONTRACT AUDIT PACKAGE
+Document: ${propDocName || "Master Services Agreement (Cloud Services v3.2).pdf"}
+Audit Timestamp: ${new Date().toLocaleString()}
+Statutory Jurisdiction: California / Delaware Standard
+
+---
+
+## 1. EXECUTIVE RISK SUMMARY
+- Total Critical Findings: 2
+- Total High Risk Findings: 1
+- Deterministic Statutory Violations: 2 (Cal. Civ. Code § 1671, UCC § 2-302)
+- Potential Uncapped Liability: $375,000
+- Recommended Target Savings: $352,500
+
+## 2. ACTIONABLE REDLINE CLAUSES
+- Section 8.2: Early Termination Penalty Acceleration (Cap at 3 months recurring fees)
+- Section 5.4: Late Payment 2.5% Compounding Interest (Reduce to Net 45, 1% simple interest)
+- Section 11.1: Limitation of Liability Asymmetry (Mutual 12-month trailing fee cap)
 `;
 
   const handleCopy = () => {
@@ -52,7 +91,7 @@ Reasoning: ${activeClause.auditorEvaluation.reasoning}
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `LexiClear-${activeClause.section.replace(/\s+/g, "_")}-CounterClause.md`;
+    link.download = `LexiClear-${(propDocName || "Contract-Audit-Package").replace(/[^a-zA-Z0-9_-]/g, "_")}.md`;
     link.click();
     URL.revokeObjectURL(url);
   };

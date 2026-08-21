@@ -39,14 +39,25 @@ interface ClauseContextType {
 
 const ClauseContext = createContext<ClauseContextType | undefined>(undefined);
 
-export const ClauseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ClauseProvider: React.FC<{
+  children: React.ReactNode;
+  initialClauseId?: string;
+  initialTab?: ActiveTab;
+}> = ({ children, initialClauseId, initialTab = "simulate" }) => {
   const [clauses] = useState<ClauseFinding[]>(MOCK_CLAUSES);
-  const [activeClause, setActiveClauseState] = useState<ClauseFinding | null>(MOCK_CLAUSES[0]);
-  const [activeTab, setActiveTab] = useState<ActiveTab>("simulate");
+  const [activeClause, setActiveClauseState] = useState<ClauseFinding | null>(() => {
+    if (initialClauseId) {
+      const found = MOCK_CLAUSES.find((c) => c.id === initialClauseId);
+      if (found) return found;
+    }
+    return MOCK_CLAUSES[0];
+  });
+  const [activeTab, setActiveTab] = useState<ActiveTab>(initialTab);
   const [variableValues, setVariableValues] = useState<Record<string, number>>(() => {
+    const selected = (initialClauseId && MOCK_CLAUSES.find((c) => c.id === initialClauseId)) || MOCK_CLAUSES[0];
     const initial: Record<string, number> = {};
-    if (MOCK_CLAUSES[0]?.variables) {
-      MOCK_CLAUSES[0].variables.forEach((v) => {
+    if (selected?.variables) {
+      selected.variables.forEach((v) => {
         initial[v.id] = v.defaultValue;
       });
     }
@@ -62,7 +73,10 @@ export const ClauseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRevising, setIsRevising] = useState(false);
   const [isEditingClause, setIsEditingClause] = useState(false);
-  const [userEditedClause, setUserEditedClause] = useState<string>(() => MOCK_CLAUSES[0]?.finalCounterClause || "");
+  const [userEditedClause, setUserEditedClause] = useState<string>(() => {
+    const selected = (initialClauseId && MOCK_CLAUSES.find((c) => c.id === initialClauseId)) || MOCK_CLAUSES[0];
+    return selected?.finalCounterClause || "";
+  });
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   const setActiveClause = (clause: ClauseFinding | null) => {
@@ -298,3 +312,7 @@ export const useClauseContext = () => {
   }
   return ctx;
 };
+
+export const useOptionalClauseContext = () => {
+  return useContext(ClauseContext);
+};
