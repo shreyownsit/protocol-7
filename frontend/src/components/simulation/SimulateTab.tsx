@@ -105,7 +105,7 @@ export const SimulateTab: React.FC = () => {
             Scenario Formulation
           </span>
           <h2 className="text-lg sm:text-xl font-semibold text-[var(--color-text-primary)] mt-1">
-            "{activeClause.scenarioQuestion}"
+            &ldquo;{activeClause.scenarioQuestion}&rdquo;
           </h2>
         </div>
         <button

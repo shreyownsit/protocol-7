@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useState, useMemo } from "react";
 import { ClauseFinding, ActiveTab, SimulationResult } from "../types/contract";
 import { MOCK_CLAUSES } from "../data/mockContracts";
 
@@ -43,7 +43,15 @@ export const ClauseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [clauses] = useState<ClauseFinding[]>(MOCK_CLAUSES);
   const [activeClause, setActiveClauseState] = useState<ClauseFinding | null>(MOCK_CLAUSES[0]);
   const [activeTab, setActiveTab] = useState<ActiveTab>("simulate");
-  const [variableValues, setVariableValues] = useState<Record<string, number>>({});
+  const [variableValues, setVariableValues] = useState<Record<string, number>>(() => {
+    const initial: Record<string, number> = {};
+    if (MOCK_CLAUSES[0]?.variables) {
+      MOCK_CLAUSES[0].variables.forEach((v) => {
+        initial[v.id] = v.defaultValue;
+      });
+    }
+    return initial;
+  });
   
   const [revealedStages, setRevealedStages] = useState({
     prosecutor: true,
@@ -54,26 +62,19 @@ export const ClauseProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRevising, setIsRevising] = useState(false);
   const [isEditingClause, setIsEditingClause] = useState(false);
-  const [userEditedClause, setUserEditedClause] = useState("");
+  const [userEditedClause, setUserEditedClause] = useState<string>(() => MOCK_CLAUSES[0]?.finalCounterClause || "");
   const [isExportOpen, setIsExportOpen] = useState(false);
-
-  // Initialize variables when active clause changes
-  useEffect(() => {
-    if (activeClause && activeClause.variables.length > 0) {
-      const initial: Record<string, number> = {};
-      activeClause.variables.forEach((v) => {
-        initial[v.id] = v.defaultValue;
-      });
-      setVariableValues(initial);
-      setUserEditedClause(activeClause.finalCounterClause);
-      setIsEditingClause(false);
-    }
-  }, [activeClause]);
 
   const setActiveClause = (clause: ClauseFinding | null) => {
     setActiveClauseState(clause);
     if (clause) {
+      const initial: Record<string, number> = {};
+      clause.variables.forEach((v) => {
+        initial[v.id] = v.defaultValue;
+      });
+      setVariableValues(initial);
       setUserEditedClause(clause.finalCounterClause);
+      setIsEditingClause(false);
     }
   };
 

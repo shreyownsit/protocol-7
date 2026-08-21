@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   AlertCircle,
   ShieldCheck,
-  RefreshCw,
   ArrowLeft,
   Loader2
 } from "lucide-react";
@@ -48,13 +47,6 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = "sign-in" }) =
       return () => clearTimeout(timer);
     }
   }, [resendCooldown]);
-
-  // Sync mode if initialMode prop changes
-  useEffect(() => {
-    setMode(initialMode);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-  }, [initialMode]);
 
   // Password validation requirements for Sign Up
   const passwordRequirements = [

@@ -5,7 +5,6 @@ import { useClauseContext } from "../../context/ClauseContext";
 import {
   Search,
   FileCheck2,
-  ShieldAlert,
   ShieldCheck,
   RotateCw,
   Edit3,
@@ -18,7 +17,6 @@ import {
   ChevronUp,
   Sparkles,
   Copy,
-  ExternalLink,
   FileText
 } from "lucide-react";
 
@@ -27,12 +25,10 @@ export const NegotiateTab: React.FC = () => {
     activeClause,
     revealedStages,
     isGenerating,
-    isRevising,
     userEditedClause,
     setUserEditedClause,
     isEditingClause,
     setIsEditingClause,
-    triggerRevision,
     regeneratePipeline,
     setIsExportOpen,
   } = useClauseContext();

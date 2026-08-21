@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { AuthCard, AuthMode } from "@/components/auth/AuthCard";
+import { AuthCard } from "@/components/auth/AuthCard";
 
 function AuthContent() {
   return <AuthCard initialMode="sign-in" />;
