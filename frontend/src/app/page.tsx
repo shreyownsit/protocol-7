@@ -107,11 +107,10 @@ export default function HomePage() {
     return documents.filter((d) => d.riskLevel === "critical" || d.riskLevel === "high" || d.status === "failed").length;
   }, [documents]);
 
-  // Action Handlers
   const handleOpenDocument = (doc: DocumentItem) => {
     setActiveDocument(doc);
     showNotification(`Opening workspace for ${doc.name}...`);
-    router.push("/simulate-negotiate");
+    router.push(`/simulate-negotiate?docId=${encodeURIComponent(doc.id)}&docName=${encodeURIComponent(doc.name)}`);
   };
 
   const handleRetryAnalysis = (doc: DocumentItem) => {

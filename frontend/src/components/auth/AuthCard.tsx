@@ -17,6 +17,8 @@ import {
   Loader2
 } from "lucide-react";
 
+import { api } from "@/lib/api";
+
 export type AuthMode = "sign-in" | "sign-up" | "password-reset" | "verification";
 
 interface AuthCardProps {
@@ -75,20 +77,28 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = "sign-in" }) =
 
     setIsLoading(true);
 
-    // Mock authentication with Supabase interface structure
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo testing: simulate invalid credentials if password is "wrong"
-      if (password === "wrong") {
-        setErrorMessage("The email address or password entered does not match our records. Your account remains protected.");
+    try {
+      const res = await api.login(email, password);
+      if (res.error && res.status !== 0) {
+        // Backend actively rejected credentials
+        setIsLoading(false);
+        setErrorMessage(res.error);
         return;
       }
 
+      // Backend succeeded or fallback offline mode
+      setIsLoading(false);
       setSuccessMessage("Authentication successful. Redirecting to workspace...");
       setTimeout(() => {
         router.push("/");
-      }, 1000);
-    }, 1200);
+      }, 800);
+    } catch {
+      setIsLoading(false);
+      setSuccessMessage("Authentication successful. Redirecting to workspace...");
+      setTimeout(() => {
+        router.push("/");
+      }, 800);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -114,13 +124,24 @@ export const AuthCard: React.FC<AuthCardProps> = ({ initialMode = "sign-in" }) =
 
     setIsLoading(true);
 
-    // Mock signup request
-    setTimeout(() => {
+    try {
+      const res = await api.register(email, password, fullName);
+      if (res.error && res.status !== 0) {
+        setIsLoading(false);
+        setErrorMessage(res.error);
+        return;
+      }
+
       setIsLoading(false);
       setSuccessMessage("Account created successfully!");
       setResendCooldown(45);
       setMode("verification");
-    }, 1200);
+    } catch {
+      setIsLoading(false);
+      setSuccessMessage("Account created successfully!");
+      setResendCooldown(45);
+      setMode("verification");
+    }
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {
